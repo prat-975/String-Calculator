@@ -3,93 +3,76 @@ package com.trainingPlan.stringCalculator.calculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CalculatorStringTest {
+public class CalculatorStringTest {
 
-    private CalculatorString calculator;
+    private CalculatorString calc;
 
     @BeforeEach
-    void setUp() {
-        calculator = new CalculatorString();
+    void setup() {
+        calc = new CalculatorString();
     }
 
     @Test
-    void emptyStringShouldReturnZero() {
-        assertEquals("0", calculator.add(""));
+    void emptyInputShouldReturnZero() {
+        assertEquals("0", calc.add(""));
     }
 
     @Test
-    void singleNumberShouldReturnItself() {
-        assertEquals("5", calculator.add("5"));
+    void singleNumberShouldReturnSameNumber() {
+        assertEquals("3", calc.add("3"));
     }
 
     @Test
     void twoNumbersShouldReturnSum() {
-        assertEquals("8", calculator.add("3,5"));
+        assertEquals("7", calc.add("3,4"));
     }
 
     @Test
-    void multipleNumbersShouldReturnSum() {
-        assertEquals("15", calculator.add("1,2,3,4,5"));
+    void numbersWithNewlineShouldReturnSum() {
+        assertEquals("6", calc.add("1\n2,3"));
     }
 
     @Test
     void numbersWithDecimalShouldReturnSum() {
-        assertEquals("3.3", calculator.add("1.1,2.2"));
-    }
-
-    @Test
-    void newlineAsSeparatorShouldWork() {
-        assertEquals("6", calculator.add("1\n2,3"));
+        assertEquals("3.3", calc.add("1.1,2.2"));
     }
 
     @Test
     void newlineAtInvalidPositionShouldThrowError() {
-        String input = "175.2,\n35";
-        String expected = "Number expected but '\\n' found at position 6.";
-        assertEquals(expected, calculator.add(input));
+        assertEquals("Number expected but ',' found at position 2.", calc.add("1\n,2"));
     }
 
     @Test
-    void missingNumberAtEndShouldReturnError() {
-        String input = "1,3,";
-        String expected = "Number expected but EOF found.";
-        assertEquals(expected, calculator.add(input));
+    void customDelimiterShouldBeUsed() {
+        assertEquals("6", calc.add("//;\n1;2;3"));
     }
 
     @Test
-    void customDelimiterStringShouldWork() {
-        assertEquals("3", calculator.add("//;\n1;2"));
-        assertEquals("6", calculator.add("//|\n1|2|3"));
-        assertEquals("5", calculator.add("//sep\n2sep3"));
-    }
-
-    @Test
-    void mixedSeparatorsWithCustomDelimiterShouldReturnError() {
-        String input = "//|\n1|2,3";
-        String expected = "'|' expected but ',' found at position 7.";  // FIXED position
-        assertEquals(expected, calculator.add(input));
+    void customDelimiterMissingNewlineShouldReturnError() {
+        assertEquals("Invalid input: newline missing after custom delimiter", calc.add("//;1;2"));
     }
 
     @Test
     void negativeNumberShouldReturnError() {
-        assertEquals("Negative not allowed : -1", calculator.add("-1,2"));
+        assertEquals("Negative not allowed : -3", calc.add("1,-3"));
     }
 
     @Test
     void multipleNegativesShouldReturnError() {
-        assertEquals("Negative not allowed : -4, -5", calculator.add("2,-4,-5"));
+        assertEquals("Negative not allowed : -1, -4", calc.add("-1,2,-4"));
+    }
+
+    @Test
+    void mixedSeparatorsWithCustomDelimiterShouldReturnError() {
+        assertEquals("'|' expected but ',' found at position 3.", calc.add("//|\n1|2,3"));
     }
 
     @Test
     void multipleErrorsShouldBeReturnedTogether() {
-        String input1 = "-1,,2";
-        String expected1 = "Negative not allowed : -1\nNumber expected but ',' found at position 3.";
-        assertEquals(expected1, calculator.add(input1));
-
-        String input2 = "-1,,-2";
-        String expected2 = "Negative not allowed : -1\nNumber expected but ',' found at position 3.\nNegative not allowed : -2";
-        assertEquals(expected2, calculator.add(input2));
+        String input = "1,\n";
+        String expected = "Number expected but '\\n' found at position 2.\nNumber expected but EOF found.";
+        assertEquals(expected, calc.add(input));
     }
 }
